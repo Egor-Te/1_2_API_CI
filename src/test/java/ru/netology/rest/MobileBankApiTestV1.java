@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
 
 class MobileBankApiTestV1 {
@@ -18,7 +19,8 @@ class MobileBankApiTestV1 {
                 .get("/demo/accounts")
                 // Проверки
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("accounts.schema.json"));
     }
 
 
@@ -63,7 +65,36 @@ class MobileBankApiTestV1 {
                 .body("[2].balance", greaterThanOrEqualTo(0));
     }
 
+    @Test
+    void test() {
+        given()
+                .then()
+                .statusCode(200)
+                // static import для JsonSchemaValidator.matchesJsonSchemaInClasspath
+                .body(matchesJsonSchemaInClasspath("accounts.schema.json"));
+    }
 
+    @Test
+    void shouldCurrencyRub() {
+        given()
+                .baseUri("http://localhost:9999/api/v1")
+                .when()
+                .get("/demo/accounts")
+                .then()
+                .body("[0].currency", equalTo("RUB"));
+
+    }
+
+    @Test
+    void shouldCurrencyUsd() {
+        given()
+                .baseUri("http://localhost:9999/api/v1")
+                .when()
+                .get("/demo/accounts")
+                .then()
+                .body("[1].currency", equalTo("USD"));
+
+    }
 }
 
 
